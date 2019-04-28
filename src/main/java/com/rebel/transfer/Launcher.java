@@ -8,13 +8,10 @@ public class Launcher {
 
     private static Logger logger = Logger.getLogger(Launcher.class.getName());
 
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) throws Exception {
         init();
-        logger.info("Creating transfer app instance");
-        TransferApp app = new TransferApp();
-        logger.info("Starting transfer app");
+        var app = new TransferApp();
         app.launch();
-        logger.info("Started transfer app");
     }
 
     private static void init() throws IOException {
