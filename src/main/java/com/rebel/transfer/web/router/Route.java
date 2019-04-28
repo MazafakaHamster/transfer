@@ -1,5 +1,6 @@
 package com.rebel.transfer.web.router;
 
+import com.rebel.transfer.web.router.request.Request;
 import io.netty.handler.codec.http.FullHttpResponse;
 import io.netty.handler.codec.http.HttpMethod;
 
@@ -8,7 +9,7 @@ public abstract class Route {
     final HttpMethod method;
     final String     path;
 
-    protected Route(HttpMethod method, String path) {
+    Route(HttpMethod method, String path) {
         this.method = method;
         this.path = path;
     }
