@@ -1,5 +1,6 @@
 package com.rebel.transfer.web;
 
+import com.google.common.util.concurrent.Striped;
 import com.rebel.transfer.service.TransferService;
 import com.rebel.transfer.web.router.RouteBuilder;
 import com.rebel.transfer.web.router.Router;
@@ -7,16 +8,19 @@ import com.rebel.transfer.web.router.exceptions.BadRequestException;
 import com.rebel.transfer.web.router.response.Response;
 
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.locks.Lock;
 
 import static com.rebel.transfer.util.JsonUtil.json;
 
 public class TransferWebServer extends NettyWebServerBase {
 
-    private TransferService transferService;
+    private final TransferService transferService;
+    private final Striped<Lock>   striped;
 
     public TransferWebServer(int port, TransferService transferService) {
         super(port);
         this.transferService = transferService;
+        this.striped = Striped.lazyWeakLock(5);
     }
 
     @Override
@@ -57,12 +61,17 @@ public class TransferWebServer extends NettyWebServerBase {
                 validate(amount > 0, "Amount less or equals 0");
                 validate(!debitAccount.equals(creditAccount), "Debit and credit accounts are same");
 
-                var result = transferService.transferMoney(debitAccount, creditAccount, amount);
-
-                if (result.succeeded()) {
-                    request.end(Response.ok(json("message", "Transfer successful")));
-                } else {
-                    fail(result.errorMessage());
+                var lock = striped.get(debitAccount);
+                lock.lock();
+                try {
+                    var result = transferService.transferMoney(debitAccount, creditAccount, amount);
+                    if (result.succeeded()) {
+                        request.end(Response.ok(json("message", "Transfer successful")));
+                    } else {
+                        fail(result.errorMessage());
+                    }
+                } finally {
+                    lock.unlock();
                 }
             })
             .build();

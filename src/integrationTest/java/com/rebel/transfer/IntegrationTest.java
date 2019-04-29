@@ -7,9 +7,13 @@ import org.junit.jupiter.api.extension.ExtendWith;
 
 import java.util.Arrays;
 import java.util.Map;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 @ExtendWith(TransferAppRule.class)
 class IntegrationTest {
@@ -103,11 +107,7 @@ class IntegrationTest {
 
         var transferAmount = 45L;
 
-        var response = client.post("/transfer", Map.of(
-            "debit", debitAccount,
-            "credit", creditAccount,
-            "amount", Long.toString(transferAmount)
-        ));
+        var response = transfer(debitAccount, creditAccount, transferAmount);
 
         status(200, response);
         assertEquals(
@@ -117,6 +117,43 @@ class IntegrationTest {
 
         balance(debitAccountBalance - transferAmount, debitAccount);
         balance(transferAmount, creditAccount);
+    }
+
+    @Test
+    void parallelTransferTest() {
+        var debitAccount = transferClient.createAccount();
+        var creditAccount = transferClient.createAccount();
+
+        var debitAccountBalance = 150L;
+
+        transferClient.lotteryWinner(debitAccount, debitAccountBalance);
+
+        var transferAmount = 90L;
+
+        var parallelRuns = 100;
+
+        ExecutorService executorService = Executors.newFixedThreadPool(parallelRuns);
+
+        Callable<HttpClient.Response> transfer = () -> transfer(debitAccount, creditAccount, transferAmount);
+
+        var successfulTransfers = IntStream.range(0, parallelRuns - 1)
+            .parallel()
+            .mapToObj(i -> executorService.submit(transfer))
+            .collect(Collectors.toList())
+            .stream()
+            .parallel()
+            .map(future -> {
+                try {
+                    return future.get();
+                } catch (Exception e) {
+                    fail(e);
+                    return null;
+                }
+            })
+            .filter(r -> r.statusCode() == 200)
+            .count();
+
+        assertEquals(1, successfulTransfers, "There should be only one successful transfer");
     }
 
     @Test
@@ -246,6 +283,14 @@ class IntegrationTest {
         ));
 
         errorMessage(response);
+    }
+
+    private HttpClient.Response transfer(String debit, String credit, Long transferAmount) {
+        return client.post("/transfer", Map.of(
+            "debit", debit,
+            "credit", credit,
+            "amount", Long.toString(transferAmount)
+        ));
     }
 
     private void balance(Long balance, String... accounts) {
