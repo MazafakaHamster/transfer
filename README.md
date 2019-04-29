@@ -27,7 +27,14 @@ Application configuration is stored in `application.json` file
 **Prerequisites**
 - Java 12 (Only Oracle JDK has been tested)
 
-To start application *gradle* task `run` should be executed. Gradle wrapper `gradlew run` could be used if no supported gradle version is present
+To start application *gradle* task `run` should be executed. Gradle wrapper `gradlew run` could be used if no supported gradle version is installed
+
+## Integration Tests Run
+
+**Prerequisites**
+- Java 12 (Only Oracle JDK has been tested)
+
+To start application's integration tests *gradle* task `integrationTest` should be executed. Gradle wrapper `gradlew integrationTest` could be used if no supported gradle version is installed
 
 ## API
 
