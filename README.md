@@ -10,7 +10,7 @@ RESTful money transfer service
 **Lombok** - pills from checked exceptions headache <br>
 **org.JSON** - JSON implementation <br>
 **Apache Http Client** - client for integration testing <br>
-**Guava** - striped lock on key
+**Guava** - striped lock on key <br>
 **JUnit** - for junit staff
 
 ## Configuration
