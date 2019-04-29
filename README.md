@@ -46,3 +46,6 @@ To start application *gradle* task `run` should be executed. Gradle wrapper `gra
 **Response:** {"message": "Transfer successful"} <br>
 **Description:** transfers `amount` of money from account `debit` to account `credit`, `amount` should be > 0, `debit` should not be equal `credit`<br>
 
+## Known Issues
+
+To avoid hazelcast performance issues due to partial incompatibility with Java Jigsaw modular system JVM params should be added: `--add-modules java.se --add-exports java.base/jdk.internal.ref=ALL-UNNAMED  --add-opens java.base/java.lang=ALL-UNNAMED  --add-opens java.base/java.nio=ALL-UNNAMED  --add-opens java.base/sun.nio.ch=ALL-UNNAMED  --add-opens java.management/sun.management=ALL-UNNAMED  --add-opens jdk.management/com.ibm.lang.management.internal=ALL-UNNAMED  --add-opens jdk.management/com.sun.management.internal=ALL-UNNAMED` 
