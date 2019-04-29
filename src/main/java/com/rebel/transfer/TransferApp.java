@@ -15,17 +15,17 @@ public class TransferApp {
 
     private final TransferWebServer webServer;
     private final HazelcastInstance hazelcastInstance;
+    private final Config config = ConfigFactory.defaultApplication();
 
     TransferApp() {
         this.hazelcastInstance = Hazelcast.newHazelcastInstance();
         var transferRepo = new TransferRepo(hazelcastInstance);
         var transferService = new TransferService(transferRepo);
-        Config config = ConfigFactory.defaultApplication();
         this.webServer = new TransferWebServer(config.getInt("rest-port"), transferService);
     }
 
     void launch(CompletableFuture<Void> startFuture) {
-        webServer.run(Executors.newFixedThreadPool(5), startFuture);
+        webServer.run(Executors.newFixedThreadPool(config.getInt("executor-threads")), startFuture);
     }
 
     void shutDown() {

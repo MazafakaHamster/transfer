@@ -1,3 +1,4 @@
 {
-    "rest-port": 8099
+    "rest-port": 8099,
+    "executor-threads": 5
 }
