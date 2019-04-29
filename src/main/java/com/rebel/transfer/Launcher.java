@@ -1,20 +1,29 @@
 package com.rebel.transfer;
 
-import java.io.IOException;
+import lombok.SneakyThrows;
+
+import java.util.concurrent.CompletableFuture;
 import java.util.logging.LogManager;
 import java.util.logging.Logger;
 
 public class Launcher {
 
-    private static Logger logger = Logger.getLogger(Launcher.class.getName());
+    private static final Logger logger = Logger.getLogger(Launcher.class.getName());
 
-    public static void main(String[] args) throws Exception {
-        init();
-        var app = new TransferApp();
-        app.launch();
+    @SneakyThrows
+    private static void init() {
+        LogManager.getLogManager().readConfiguration(Launcher.class.getResourceAsStream("/logging.properties"));
     }
 
-    private static void init() throws IOException {
-        LogManager.getLogManager().readConfiguration(Launcher.class.getResourceAsStream("/logging.properties"));
+    public static void main(String[] args) {
+        init();
+        launch();
+    }
+
+    private static void launch() {
+        var app = new TransferApp();
+        var future = new CompletableFuture<Void>();
+        future.thenRun(() -> logger.info("Application started"));
+        app.launch(future);
     }
 }

@@ -1,37 +1,41 @@
 package com.rebel.transfer.web.router.response;
 
-import io.netty.handler.codec.http.HttpResponseStatus;
+import io.netty.buffer.Unpooled;
+import io.netty.handler.codec.http.*;
+import io.netty.util.CharsetUtil;
+import org.json.JSONObject;
 
 public class Response {
     private HttpResponseStatus httpResponseStatus;
-    private String             message;
+    private JSONObject         content;
 
-    private Response(HttpResponseStatus httpResponseStatus, String message) {
+    private Response(HttpResponseStatus httpResponseStatus, JSONObject content) {
         this.httpResponseStatus = httpResponseStatus;
-        this.message = message;
+        this.content = content;
     }
 
-    public HttpResponseStatus httpResponseStatus() {
+    private HttpResponseStatus httpResponseStatus() {
         return httpResponseStatus;
     }
 
-    public String message() {
-        return message;
+    private JSONObject content() {
+        return content;
     }
 
-    public static Response ok() {
-        return ok(null);
+    public static Response ok(JSONObject content) {
+        return new Response(HttpResponseStatus.OK, content);
     }
 
-    public static Response ok(String message) {
-        return new Response(HttpResponseStatus.OK, message);
+    public static Response custom(HttpResponseStatus status, JSONObject content) {
+        return new Response(status, content);
     }
 
-    public static Response custom(HttpResponseStatus status) {
-        return custom(status, null);
-    }
-
-    public static Response custom(HttpResponseStatus status, String message) {
-        return new Response(status, message);
+    public FullHttpResponse toNetty() {
+        var nettyContent = Unpooled.copiedBuffer(content().toString(), CharsetUtil.UTF_8);
+        var r = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, httpResponseStatus(), nettyContent);
+        r.headers()
+            .set(HttpHeaderNames.CONTENT_TYPE, "text/json")
+            .set(HttpHeaderNames.CONTENT_LENGTH, nettyContent.readableBytes());
+        return r;
     }
 }

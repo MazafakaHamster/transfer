@@ -10,7 +10,7 @@ import static java.util.Objects.isNull;
 
 public class TransferRepo {
 
-    private final IMap<String, Account>   accountMap;
+    private final IMap<String, Account>    accountMap;
     private final IMap<String, Operation> operationMap;
 
     public TransferRepo(HazelcastInstance instance) {
@@ -23,11 +23,11 @@ public class TransferRepo {
     }
 
     public void saveAccount(Account account) {
-        accountMap.set(account.id(), account);
+        accountMap.put(account.id(), account);
     }
 
     public void saveOperation(Operation operation) {
-        operationMap.set(operation.id(), operation);
+        operationMap.put(operation.id(), operation);
     }
 
     public boolean accountExists(String id) {

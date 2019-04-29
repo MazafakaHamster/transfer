@@ -10,18 +10,26 @@ import io.netty.handler.codec.http.HttpObjectAggregator;
 import io.netty.handler.codec.http.HttpServerCodec;
 import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
+import lombok.SneakyThrows;
+
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Future;
+import java.util.function.Consumer;
 
 public abstract class NettyWebServerBase {
 
     private final int port;
+    private Channel channel;
 
     NettyWebServerBase(int port) {
         this.port = port;
     }
 
-    protected abstract Router router();
+    protected abstract Router router(ExecutorService executor);
 
-    public void run() throws Exception {
+    @SneakyThrows
+    public void run(ExecutorService executor, CompletableFuture<Void> startListener) {
         var eventLoopGroup = new NioEventLoopGroup();
         try {
 
@@ -34,15 +42,21 @@ public abstract class NettyWebServerBase {
                         ch.pipeline()
                             .addLast(new HttpServerCodec())
                             .addLast(new HttpObjectAggregator(512 * 1024))
-                            .addLast(router());
+                            .addLast(router(executor));
                     }
                 })
                 .channel(NioServerSocketChannel.class);
 
-            var ch = bootstrap.bind(port).sync().channel();
-            ch.closeFuture().sync();
+            channel = bootstrap.bind(port).sync().channel();
+
+            startListener.complete(null);
+            channel.closeFuture().sync();
         } finally {
             eventLoopGroup.shutdownGracefully();
         }
+    }
+
+    public void shutdown() {
+        channel.close();
     }
 }

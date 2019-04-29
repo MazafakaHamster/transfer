@@ -1,7 +1,6 @@
 package com.rebel.transfer.web.router;
 
 import com.rebel.transfer.web.router.request.Request;
-import com.rebel.transfer.web.router.response.Response;
 import io.netty.handler.codec.http.HttpMethod;
 
 public abstract class Route {
@@ -14,7 +13,7 @@ public abstract class Route {
         this.path = path;
     }
 
-    public abstract Response handle(Request request);
+    public abstract void handle(Request request);
 
     @Override
     public String toString() {

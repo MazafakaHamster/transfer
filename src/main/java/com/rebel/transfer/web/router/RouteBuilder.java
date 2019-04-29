@@ -1,44 +1,46 @@
 package com.rebel.transfer.web.router;
 
 import com.rebel.transfer.web.router.request.Request;
-import com.rebel.transfer.web.router.response.Response;
 import io.netty.handler.codec.http.HttpMethod;
 
 import java.util.LinkedList;
 import java.util.List;
-import java.util.function.Function;
+import java.util.concurrent.ExecutorService;
+import java.util.function.Consumer;
 
 public class RouteBuilder {
 
-    private final List<Route> routes;
+    private final List<Route>     routes;
+    private final ExecutorService executor;
 
-    public RouteBuilder() {
+    public RouteBuilder(ExecutorService executor) {
         this.routes = new LinkedList<>();
+        this.executor = executor;
     }
 
-    public RouteBuilder get(String uri, Function<Request, Response> handler) {
+    public RouteBuilder get(String uri, Consumer<Request> handler) {
         return addRequest(HttpMethod.GET, uri, handler);
     }
 
-    public RouteBuilder post(String uri, Function<Request, Response> handler) {
+    public RouteBuilder post(String uri, Consumer<Request> handler) {
         return addRequest(HttpMethod.POST, uri, handler);
     }
 
     private RouteBuilder addRequest(
         HttpMethod method,
         String uri,
-        Function<Request, Response> handler
+        Consumer<Request> handler
     ) {
         routes.add(new Route(method, uri) {
             @Override
-            public Response handle(Request request) {
-                return handler.apply(request);
+            public void handle(Request request) {
+                handler.accept(request);
             }
         });
         return this;
     }
 
     public Router build() {
-        return new Router(routes);
+        return new Router(routes, executor);
     }
 }

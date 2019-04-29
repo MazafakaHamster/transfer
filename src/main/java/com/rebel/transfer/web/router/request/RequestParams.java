@@ -1,5 +1,7 @@
 package com.rebel.transfer.web.router.request;
 
+import com.rebel.transfer.web.router.exceptions.BadRequestException;
+
 import java.util.List;
 import java.util.Map;
 
@@ -14,7 +16,7 @@ public class RequestParams {
         try {
             return parameters.get(name).get(0);
         } catch (Exception e) {
-            throw new ValidationException("Mandatory param `%s` not found", name);
+            throw new BadRequestException("Mandatory param `%s` not found", name);
         }
     }
 
@@ -24,7 +26,7 @@ public class RequestParams {
         try {
            return Long.parseLong(value);
         } catch (Exception e) {
-            throw new ValidationException("Mandatory param `%s` expected type `long` got value `%s`", name, value);
+            throw new BadRequestException("Mandatory param `%s` expected type `long` got value `%s`", name, value);
         }
     }
 }
