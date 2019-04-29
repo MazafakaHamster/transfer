@@ -1,7 +1,7 @@
 package com.rebel.transfer.web.router;
 
 import com.rebel.transfer.web.router.request.Request;
-import io.netty.handler.codec.http.FullHttpResponse;
+import com.rebel.transfer.web.router.response.Response;
 import io.netty.handler.codec.http.HttpMethod;
 
 import java.util.LinkedList;
@@ -16,22 +16,22 @@ public class RouteBuilder {
         this.routes = new LinkedList<>();
     }
 
-    public RouteBuilder get(String uri, Function<Request, FullHttpResponse> handler) {
+    public RouteBuilder get(String uri, Function<Request, Response> handler) {
         return addRequest(HttpMethod.GET, uri, handler);
     }
 
-    public RouteBuilder post(String uri, Function<Request, FullHttpResponse> handler) {
+    public RouteBuilder post(String uri, Function<Request, Response> handler) {
         return addRequest(HttpMethod.POST, uri, handler);
     }
 
     private RouteBuilder addRequest(
         HttpMethod method,
         String uri,
-        Function<Request, FullHttpResponse> handler
+        Function<Request, Response> handler
     ) {
         routes.add(new Route(method, uri) {
             @Override
-            public FullHttpResponse handle(Request request) {
+            public Response handle(Request request) {
                 return handler.apply(request);
             }
         });

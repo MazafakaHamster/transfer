@@ -5,10 +5,16 @@ import com.rebel.transfer.model.Result;
 import com.rebel.transfer.repository.TransferRepo;
 
 import java.util.UUID;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class TransferService {
 
     private final TransferRepo transferRepo;
+
+    private ExecutorService executorService = Executors.newFixedThreadPool(5);
 
     public TransferService(TransferRepo transferRepo) {
         this.transferRepo = transferRepo;
@@ -20,8 +26,10 @@ public class TransferService {
         return account.id();
     }
 
-    public Result getBalance(String id) {
+    public Result getBalance(final String id) {
+        final Account account = transferRepo.loadAccount(id);
         return transferRepo.getBalance(id);
+
     }
 
     public Result lotteryWinner(String id, Long amount) {
@@ -29,6 +37,7 @@ public class TransferService {
     }
 
     public Result transferMoney(String debitAccount, String creditAccount, Long amount) {
+
         if (!transferRepo.accountExists(debitAccount))
             return Result.fail("Debit account not found");
 

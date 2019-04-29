@@ -6,10 +6,7 @@ import com.rebel.transfer.model.Account;
 import com.rebel.transfer.model.Operation;
 import com.rebel.transfer.model.Result;
 
-import java.util.Optional;
-
 import static java.util.Objects.isNull;
-import static java.util.Objects.nonNull;
 
 public class TransferRepo {
 

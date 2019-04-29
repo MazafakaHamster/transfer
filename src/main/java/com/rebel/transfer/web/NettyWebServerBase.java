@@ -15,7 +15,7 @@ public abstract class NettyWebServerBase {
 
     private final int port;
 
-    public NettyWebServerBase(int port) {
+    NettyWebServerBase(int port) {
         this.port = port;
     }
 
